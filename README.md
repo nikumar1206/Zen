@@ -27,7 +27,9 @@ A REPL that can only handle one line of code:
 go run main.go
 ```
 
-To run against a file.
+Type `exit` to leave the repl
+
+To run against a file:
 
 ```
 go run main.go -f hello_world.zen

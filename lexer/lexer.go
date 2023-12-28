@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"interpreter/tokens"
@@ -14,13 +15,15 @@ type Lexer struct {
 	PeakPosition int
 	CurrChar     byte
 	BuffLength   int
+	Declarations []string
 }
 
 func NewLexer(b string) *Lexer {
 	lex := &Lexer{
-		Buffer:     b,
-		Tokens:     make([]*token.Token, 0),
-		BuffLength: len(b),
+		Buffer:       b,
+		Tokens:       make([]*token.Token, 0),
+		Declarations: make([]string, 0),
+		BuffLength:   len(b),
 	}
 	lex.readChars()
 	return lex
@@ -97,10 +100,16 @@ func (l *Lexer) NextToken() (*token.Token, error) {
 				newToken = token.NewToken(token.LOG, poss_token)
 			case "func", "fn":
 				newToken = token.NewToken(token.FUNCTION, poss_token)
+				l.readChars()
+				l.Declarations = append(l.Declarations, l.readStringIdentifier())
 			case "let":
 				newToken = token.NewToken(token.LET, poss_token)
+				l.readChars()
+				l.Declarations = append(l.Declarations, l.readStringIdentifier())
 			case "const":
 				newToken = token.NewToken(token.CONST, poss_token)
+				l.readChars()
+				l.Declarations = append(l.Declarations, l.readStringIdentifier())
 			case "if":
 				newToken = token.NewToken(token.IF, poss_token)
 			case "else":
@@ -112,7 +121,14 @@ func (l *Lexer) NextToken() (*token.Token, error) {
 			case "false":
 				newToken = token.NewToken(token.FALSE, poss_token)
 			default:
-				newToken = token.NewToken(token.LITERAL, poss_token)
+				if slices.Contains(l.Declarations, poss_token) {
+					newToken = token.NewToken(token.LITERAL, poss_token)
+				} else {
+					newToken = token.NewToken(token.ILLEGAL, "")
+				}
+			}
+			if newToken.Type == token.ILLEGAL {
+				return nil, fmt.Errorf("Token %s is an illegal token. Please verify your syntax.", poss_token)
 			}
 			return newToken, nil
 		} else if l.isNumeric(b) {

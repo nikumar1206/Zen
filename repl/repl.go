@@ -16,8 +16,9 @@ func Initiate() error {
 	if err != nil {
 		return err
 	}
+	username := strings.ToUpper(string(user.Username[0])) + user.Username[1:]
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Printf("Welcome to Zen's interpreter %s. Please type an expression 🤟\n", strings.ToTitle(user.Username))
+	fmt.Printf("Welcome to Zen's interpreter %s. Please type an expression 🤟\n", username)
 
 	for {
 		fmt.Printf("➥  ")
@@ -35,11 +36,10 @@ func Initiate() error {
 
 		tokens, err := l.Tokenize()
 		if err != nil {
-			return err
+			fmt.Println(err)
 		}
-
 		for i := range tokens {
-			fmt.Println("✲ "+"Type: "+tokens[i].Type, " , ", "Value: "+tokens[i].Value)
+			fmt.Println("✲ "+"Type: "+tokens[i].Type, ", ", "Value: "+tokens[i].Value)
 		}
 
 	}
